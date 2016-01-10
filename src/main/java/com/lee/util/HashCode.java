@@ -62,7 +62,7 @@ public final class HashCode {
 	public static int asNthInt(byte[] bytes, int n) { return asInt(bytes, (n-1)*4); }
 	
 	/**
-     * returns four bytes of {@code bytes} began with {@code fromIndex},
+     * returns four bytes of {@code bytes} began with byte index {@code fromIndex},
      * converted to an {@code int} value in little-endian order. if it has not enough bits,
      * padding {@code 0x00} as the remaining most-significant bytes
      */
@@ -76,6 +76,31 @@ public final class HashCode {
 		case 2: value |= ((0xff & bytes[fromIndex+1]) << 8);
 		case 1: value |= (0xff & bytes[fromIndex]);
 		}
+		return value;
+	}
+	
+	/**
+     * returns four bytes of {@code bytes} began with bit index {@code bitIndex},
+     * converted to an {@code int} value in little-endian order. if it has not enough bits,
+     * padding {@code 0x00} as the remaining most-significant bytes
+     */
+	public static int asIntFrom(byte[] bytes, long bitIndex) {
+		if(bitIndex < 0 || bitIndex >= bytes.length*8) { return 0; }
+
+		int index = (int) (bitIndex / 8);
+		int offset = (int) (bitIndex % 8);
+		int value = (0xff & bytes[index]) >>> offset;
+		
+		for(int i=1, shift=8-offset; i<4; i++, shift+=8) {
+			index += 1;
+			if(index >= bytes.length) { break; }
+			value |= (0xff & bytes[index]) << shift;
+		}
+		
+		if(offset > 0 && (index+=1) < bytes.length) {
+			value |= ((int)bytes[index]) << (-offset);
+		}
+		
 		return value;
 	}
 	
@@ -158,7 +183,7 @@ public final class HashCode {
 	public static long asNthLong(byte[] bytes, int n) { return asLong(bytes, (n-1) * 8); }
 	
 	/**
-     * returns eight bytes of {@code bytes} began with {@code fromIndex},
+     * returns eight bytes of {@code bytes} began with byte index {@code fromIndex},
      * converted to an {@code long} value in little-endian order. if it has not enough bits,
      * padding {@code 0x00} as the remaining most-significant bytes
      */
@@ -176,6 +201,31 @@ public final class HashCode {
 		case 2: value |= ((0xffL & bytes[1]) << 8);
 		case 1: value |= (0xffL & bytes[0]);
 		}
+		return value;
+	}
+	
+	/**
+     * returns eight bytes of {@code bytes} began with bit index {@code bitIndex},
+     * converted to an {@code long} value in little-endian order. if it has not enough bits,
+     * padding {@code 0x00} as the remaining most-significant bytes
+     */
+	public static long asLongFrom(byte[] bytes, long bitIndex) {
+		if(bitIndex < 0 || bitIndex >= bytes.length*8) { return 0; }
+		
+		int index = (int) (bitIndex / 8);
+		int offset = (int) (bitIndex % 8);
+		long value = (0xffL & bytes[index]) >>> offset;
+		
+		for(int i=1, shift=8-offset; i<8; i++, shift+=8) {
+			index += 1;
+			if(index >= bytes.length) { break; }
+			value |= (0xffL & bytes[index]) << shift;
+		}
+		
+		if(offset > 0 && (index+=1) < bytes.length) {
+			value |= ((long)bytes[index]) << (-offset);
+		}
+		
 		return value;
 	}
 	

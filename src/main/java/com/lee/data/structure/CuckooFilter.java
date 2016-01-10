@@ -172,11 +172,20 @@ public final class CuckooFilter<T> {
 		return hasBeenRemoved;
 	}
 	
-	/** return number of existed elements in this CuckooFilter **/
+	/** return number of existed elements within this CuckooFilter **/
 	public int numOfExistedElements() { return numOfExistedElements; }
 	
 	/** return the number of kick out elements after {@link #MAX_KICK_OUT_TIMES} relocation times **/
 	public int numOfKickoutElements() { return numOfKickoutElements; }
+	
+	/** return the number of buckets within this CuckooFilter **/
+	public int numOfBuckets() { return buckets.numOfBuckets; }
+	
+	/** return the number of entries per bucket within this CuckooFilter **/
+	public int numOfEntries() { return buckets.numOfEntries; }
+	
+	/** return the length of finger print within this CuckooFilter **/
+	public int fingerprintLength() { return buckets.fingerprintLength; }
 	
 	/**
 	 * create a {@link BloomFilter BloomFilter<T>} with the expected number of element and
@@ -237,15 +246,15 @@ public final class CuckooFilter<T> {
 	 * false positive probability
 	 */
 	private static final int optimalFingerprintLength(int b, double p) {
-		return (int) Math.round(1 + Math.log(b / p) / Math.log(2));
+		return (int) Math.ceil(1 + Math.log(b / p) / Math.log(2));
 	}
 	
 	/**
 	 * compute the m (number of buckets), given the number of elements and the empirical number of entries in bucket
 	 * <p>note that to ensure the kick out strategy the minimum number of buckets must be 2</p>
 	 */
-	private static final int numOfBuckets(int n, int b) {
-		return Math.max(2, Math.round(n / b));
+	private static final int numOfBuckets(int n, float b) {
+		return Math.max(2, (int)Math.ceil(n / b));
 	}
 	
 	private static abstract class Buckets {
@@ -273,7 +282,7 @@ public final class CuckooFilter<T> {
 						numOfBuckets, numOfEntries, fingerprintLength));
 			}
 			return fingerprintLength <= 64 ? new SmallFingerprintBuckets(numOfBuckets, numOfEntries, fingerprintLength) :
-				new LargerFingerprintBuckets(numOfBuckets, numOfEntries, fingerprintLength);
+				new LargeFingerprintBuckets(numOfBuckets, numOfEntries, fingerprintLength);
 		}
 
 		private static boolean exceedCapacity(int numOfBuckets, int numOfEntries, int fingerprintLength) {
@@ -347,6 +356,10 @@ public final class CuckooFilter<T> {
 		}
 		
 		protected abstract void clearAt(long startBitIndex);
+		
+		protected static int segmentIndex(long bitIndex) { return (int) (bitIndex >>> 6);	}	// startBitIndex / 64
+		
+		protected static int offset(long bitIndex) { return (int) (bitIndex & 0x3fL); }	// startBitIndex % 64
 	}
 	
 	/** fingerprintLength <= 64 **/
@@ -382,10 +395,6 @@ public final class CuckooFilter<T> {
 				return true;
 			}
 		}
-		
-		private int segmentIndex(long bitIndex) { return (int) (bitIndex >>> 6);	}	// startBitIndex / 64
-		
-		private int offset(long bitIndex) { return (int) (bitIndex & 0x3fL); }	// startBitIndex % 64
 		
 		@Override
 		protected byte[] replaceAt(byte[] fingerprint, long startBitIndex) {
@@ -434,22 +443,25 @@ public final class CuckooFilter<T> {
 			}
 			return fingerprint;
 		}
-		
+
 		@Override
 		protected boolean existAt(byte[] fingerprint, long startBitIndex) {
 			int segmentIndex = segmentIndex(startBitIndex);
 			int offset = offset(startBitIndex);
 			long segment = bits[segmentIndex];
 			
+			long mask = SEGMENT_MASK >>> (-fingerprintLength);
+			long f = HashCode.asLong(fingerprint) & mask;
 			int endOffset = offset + fingerprintLength;
 			if(endOffset <= 64) {
-				long mask = (SEGMENT_MASK >>> (-endOffset)) & (SEGMENT_MASK << offset);
-				return (segment & mask) != 0;
+				long existed = (segment >>> offset) & mask;
+				return f == existed;
 			}else {		// cross segment
-				long firstMask = SEGMENT_MASK << offset;
-				long secondMask = SEGMENT_MASK >>> (-endOffset);
+				long existed = segment >>> offset;
 				long secondSegment = bits[segmentIndex+1];
-				return (segment & firstMask) != 0 || (secondSegment & secondMask) != 0;
+				existed |= secondSegment << (-offset);
+				existed &= mask; 
+				return f == existed;
 			}
 		}
 		
@@ -477,34 +489,167 @@ public final class CuckooFilter<T> {
 	}
 	
 	/** fingerprintLength > 64 **/
-	private static final class LargerFingerprintBuckets extends Buckets {
+	private static final class LargeFingerprintBuckets extends Buckets {
 
-		LargerFingerprintBuckets(int numOfBuckets, int numOfEntries, int fingerprintLength) {
+		LargeFingerprintBuckets(int numOfBuckets, int numOfEntries, int fingerprintLength) {
 			super(numOfBuckets, numOfEntries, fingerprintLength);
 		}
 
 		@Override
 		protected boolean putAt(byte[] fingerprint, long startBitIndex) {
-			// TODO Auto-generated method stub
-			return false;
+			int segmentIndex = segmentIndex(startBitIndex);
+			int segmentOffset = offset(startBitIndex);
+
+			long mask = SEGMENT_MASK << segmentOffset;
+			if((bits[segmentIndex] & mask) != 0) { return false; }
+			int index = segmentIndex + 1;
+			int len = fingerprintLength - (64 - segmentOffset);
+			while(len >= 64) {
+				if(bits[index] != 0) { return false; }
+				len -= 64;
+				index += 1;
+			}
+			if(len > 0) {
+				mask = SEGMENT_MASK >>> (-len);
+				if((bits[index] & mask) != 0) { return false; }
+			}
+			
+			// empty, can put
+			bits[segmentIndex] |= HashCode.asLong(fingerprint) << segmentOffset;
+			index = segmentIndex + 1;
+			int offset = 64 - segmentOffset;
+			len = fingerprintLength - offset;
+			while(len >= 64) {
+				bits[index] = HashCode.asLongFrom(fingerprint, offset);
+				index += 1;
+				offset += 64;
+				len -= 64;
+			}
+			if(len > 0) {
+				bits[index] |= HashCode.asLongFrom(fingerprint, offset) & (SEGMENT_MASK >>> (-len));
+			}
+			return true;
 		}
 
 		@Override
 		protected byte[] replaceAt(byte[] fingerprint, long startBitIndex) {
-			// TODO Auto-generated method stub
-			return null;
+			int segmentIndex = segmentIndex(startBitIndex);
+			int segmentOffset = offset(startBitIndex);
+
+			int index = segmentIndex;
+			int offset = segmentOffset;
+			int len = fingerprintLength;
+			int i = 0;
+			while(len >= 8) {
+				fingerprint[i] = replaceByteAt(index, offset, fingerprint[i]);
+				i += 1;
+				len -= 8;
+				offset += 8;
+				if(offset >= 64) {
+					index += 1;
+					offset -= 64;
+				}
+			}
+			if(len > 0) {
+				byte b = replaceLowBitsAt(index, offset, fingerprint[i], len);
+				int mask = (1 << len) - 1;
+				int newValue = fingerprint[i] & (~mask);	// clear
+				newValue |= (b & mask);	// set
+				fingerprint[i] = (byte) newValue;
+			}
+			return fingerprint;
+		}
+		
+		private byte replaceByteAt(int segmentIndex, int segmentOffset, byte b) {
+			long oldValue = 0;
+			if(segmentOffset + 8 <= 64) {
+				long mask = 0xffL << segmentOffset;
+				oldValue = (bits[segmentIndex] >>> segmentOffset) & 0xffL;
+				bits[segmentIndex] &= (~mask);	// clear
+				bits[segmentIndex] |= (0xffL & b) << segmentOffset;	// set
+			}else {		// cross segment
+				oldValue = bits[segmentIndex] >>> segmentOffset;
+				int shift = 64 - segmentOffset;
+				long mask = (1L << shift) - 1;
+				bits[segmentIndex] &= ~(mask << segmentOffset);	// clear
+				bits[segmentIndex] |= (mask & b) << segmentOffset;	// set
+				mask = (1L << (8-shift)) - 1;
+				segmentIndex += 1;
+				oldValue |= (bits[segmentIndex] & mask) << shift;
+				bits[segmentIndex] &= (~mask);	// clear
+				bits[segmentIndex] |= mask & (b >>> shift);
+			}
+			return (byte) oldValue;
+		}
+		
+		private byte replaceLowBitsAt(int segmentIndex, int segmentOffset, byte b, int bitLen) {
+			long oldValue = 0;
+			if(segmentOffset + bitLen <= 64) {
+				long mask = (1L << bitLen) - 1;
+				oldValue = (bits[segmentIndex] >>> segmentOffset) & mask;
+				bits[segmentIndex] &= ~(mask << segmentOffset);	// clear
+				bits[segmentIndex] |= (mask & b) << segmentOffset;	// set
+			}else {		// cross segment
+				oldValue = bits[segmentIndex] >>> segmentOffset;
+				int shift = 64 - segmentOffset;
+				long mask = (1L << shift) - 1;
+				bits[segmentIndex] &= ~(mask << segmentOffset);	// clear
+				bits[segmentIndex] |= (mask & b) << segmentOffset;	// set
+				mask = (1L << (bitLen-shift)) - 1;
+				segmentIndex += 1;
+				oldValue |= (bits[segmentIndex] & mask) << shift;
+				bits[segmentIndex] &= (~mask);	// clear
+				bits[segmentIndex] |= mask & (b >>> shift);
+			}
+			return (byte) oldValue;
 		}
 
 		@Override
 		protected boolean existAt(byte[] fingerprint, long startBitIndex) {
-			// TODO Auto-generated method stub
-			return false;
+			int segmentIndex = segmentIndex(startBitIndex);
+			int segmentOffset = offset(startBitIndex);
+
+			long mask = SEGMENT_MASK >>> segmentOffset;
+			long f = HashCode.asLong(fingerprint) & mask;
+			long existed = bits[segmentIndex] >>> segmentOffset;
+			if(f != existed) { return false; }
+			int index = segmentIndex + 1;
+			int shift = 64 - segmentOffset;
+			int len = fingerprintLength - shift;
+			while(len >= 64) {
+				f = HashCode.asLongFrom(fingerprint, shift);
+				if(bits[index] != f) { return false; }
+				len -= 64;
+				shift += 64;
+				index += 1;
+			}
+			if(len > 0) {
+				mask = SEGMENT_MASK >>> (-len);
+				f = HashCode.asLongFrom(fingerprint, shift) & mask;
+				existed = bits[index] & mask;
+				if(f != existed) { return false; }
+			}
+			return true;
 		}
 
 		@Override
 		protected void clearAt(long startBitIndex) {
-			// TODO Auto-generated method stub
-			
+			int segmentIndex = segmentIndex(startBitIndex);
+			int segmentOffset = offset(startBitIndex);
+
+			long mask = SEGMENT_MASK << segmentOffset;
+			bits[segmentIndex] &= (~mask);
+			int index = segmentIndex + 1;
+			int len = fingerprintLength - (64 - segmentOffset);
+			while(len >= 64) {
+				bits[index] = 0;
+				len -= 64;
+				index += 1;
+			}
+			if(len > 0) {
+				mask = SEGMENT_MASK >>> (-len);
+				bits[index] &= (~mask);
+			}
 		}
 		
 	}

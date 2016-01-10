@@ -120,9 +120,13 @@ public final class Hashing {
 			}else if(obj instanceof CharSequence) {
 				CharSequence chars = (CharSequence) obj;
 				int length = chars.length();
-				for(int i=0; i<length; i++) {
-					bb.putChar(chars.charAt(i));
-					processIfFull(2);
+				if(length == 0) {
+					bb.putChar((char) 0);
+				}else {
+					for(int i=0; i<length; i++) {
+						bb.putChar(chars.charAt(i));
+						processIfFull(2);
+					}
 				}
 			}else { bb.putInt(obj.hashCode()); }
 		}
@@ -130,7 +134,6 @@ public final class Hashing {
 		final byte[] hash() {
 			bb.flip();
 	    	while(bb.remaining() > chunckSize) { process(bb); }
-	    	bb.compact();
 	    	if(bb.remaining() > 0) { processRemaining(bb); }
 	    	return makeHash();
 		}
