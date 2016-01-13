@@ -2,8 +2,8 @@ package com.lee.data.structure;
 
 import java.util.Random;
 
-import com.lee.util.HashCode;
-import com.lee.util.Hashing;
+import com.lee.data.structure.util.HashCode;
+import com.lee.data.structure.util.Hashing;
 
 /**
  * see more detail of <a href="http://www.cs.cmu.edu/~binfan/papers/conext14_cuckoofilter.pdf">Cuckoo Filter</a>

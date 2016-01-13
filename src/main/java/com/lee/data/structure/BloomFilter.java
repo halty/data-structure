@@ -1,7 +1,7 @@
 package com.lee.data.structure;
 
-import com.lee.util.HashCode;
-import com.lee.util.Hashing;
+import com.lee.data.structure.util.HashCode;
+import com.lee.data.structure.util.Hashing;
 
 /**
  * see more detail of <a href="https://en.wikipedia.org/wiki/Bloom_filter">Bloom Filter</a>

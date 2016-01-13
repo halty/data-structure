@@ -1,6 +1,6 @@
 package com.lee.data.structure;
 
-import static com.lee.util.PlatformDependent.hasUnsafe;;
+import static com.lee.data.structure.util.PlatformDependent.hasUnsafe;
 
 /** Non thread safe buffer **/
 public abstract class RollingCharBuffer {

@@ -1,4 +1,4 @@
-package com.lee.util;
+package com.lee.data.structure.util;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

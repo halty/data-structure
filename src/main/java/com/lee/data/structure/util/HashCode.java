@@ -1,4 +1,4 @@
-package com.lee.util;
+package com.lee.data.structure.util;
 
 public final class HashCode {
 

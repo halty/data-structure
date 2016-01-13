@@ -1,6 +1,6 @@
 package com.lee.data.structure;
 
-import static com.lee.util.PlatformDependent.*;
+import static com.lee.data.structure.util.PlatformDependent.*;
 import sun.misc.Cleaner;
 
 /** A rolling char buffer based OS's memory **/
