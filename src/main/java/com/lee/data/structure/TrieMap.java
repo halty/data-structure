@@ -158,4 +158,147 @@ public class TrieMap<V> {
 		parent.childNodes = newChildNodes;
 		parent.chars = newChars;
 	}
+	
+	public V get(String key) {
+		if(key == null) {
+			return valueForNullKey;
+		}else if(key.isEmpty()) {
+			return root.value;
+		}else {
+			TrieNode<V> node = get(key, 0, root);
+			if(node != null) {
+				return node.value;
+			}else {
+				return null;
+			}
+		}
+	}
+	
+	private TrieNode<V> get(String key, int index, TrieNode<V> parent) {
+		if(index == key.length()) {
+			return parent;
+		}else {
+			char ch = key.charAt(index);
+			TrieNode<V> node = null;
+			if(ch == 0) {
+				node = parent.childNodeForZeroChar;
+			}else {
+				int first = ch % parent.chars.length;
+				boolean found = false;
+				int i = first;
+				do {
+					if(parent.chars[i] == 0) {
+						break;
+					}else if(parent.chars[i] == ch) {
+						found = true;
+						break;
+					}else {
+						i = (i+1) % parent.chars.length;
+					}
+				}while(i != first);
+				if(found) {
+					node = parent.childNodes[i];
+				}
+			}
+			if(node != null) {
+				return get(key, index+1, node);
+			}else {
+				return null;
+			}
+		}
+	}
+	
+	public boolean containKey(String key) {
+		if(key == null) {
+			return hasNullKey;
+		}else if(key.isEmpty()) {
+			return root.occupied;
+		}else {
+			TrieNode<V> node = get(key, 0, root);
+			if(node != null) {
+				return node.occupied;
+			}else {
+				return false;
+			}
+		}
+	}
+	
+	public V remove(String key) {
+		V oldValue = null;
+		if(key == null) {
+			if(hasNullKey) {
+				oldValue = valueForNullKey;
+				valueForNullKey = null;
+				hasNullKey = false;
+				size--;
+			}
+		}else if(key.isEmpty()) {
+			if(root.occupied) {
+				oldValue = root.value;
+				root.value = null;
+				root.occupied = false;
+				size--;
+			}
+		}else {
+			TrieNode<V> node = get(key, 0, root);
+			if(node != null) {
+				if(node.occupied) {
+					oldValue = node.value;
+					node.value = null;
+					node.occupied = false;
+					size--;
+				}
+			}
+		}
+		return oldValue;
+	}
+	
+	public void compact() {
+		// TODO: compact the path to release storage space
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder(16*size+2);	// 预估长度
+		if(size == 0) {
+			return buf.append("{}").toString();
+		}
+		buf.append("{");
+		if(hasNullKey) {
+			buf.append("null = ")
+			.append(valueForNullKey == this ? "(this map)" : valueForNullKey)
+			.append(", ");
+		}
+		StringBuilder keyStack = new StringBuilder();
+		append(keyStack, root, buf);
+		if(buf.length() > 1) {
+			buf.setLength(buf.length()-2);
+			buf.append("}");
+		}
+		return buf.toString();
+	}
+	
+	private void append(StringBuilder keyStack, TrieNode<V> parent, StringBuilder buf) {
+		if(parent.occupied) {
+			buf.append(keyStack.toString())
+			.append(" = ")
+			.append(parent.value == this ? "(this map)" : parent.value)
+			.append(", ");
+		}
+		if(parent.childNodeForZeroChar != null) {
+			char ch = 0;
+			keyStack.append(ch);
+			append(keyStack, parent.childNodeForZeroChar, buf);
+			keyStack.setLength(keyStack.length()-1);
+		}
+		if(parent.numOfChildNodes > 0) {
+			for(int i=0; i<parent.chars.length; i++) {
+				char ch = parent.chars[i];
+				if(ch == 0) { continue; }
+				keyStack.append(ch);
+				append(keyStack, parent.childNodes[i], buf);
+				keyStack.setLength(keyStack.length()-1);
+			}
+		}
+	}
 }

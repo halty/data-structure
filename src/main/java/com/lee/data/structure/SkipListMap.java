@@ -139,12 +139,16 @@ public class SkipListMap<K, V> {
 	
 	@Override
 	public String toString() {
-		StringBuilder buf = new StringBuilder(size * (5 + 1 + 8 + 1) + 2);	// '{' 预估keyLen=3, '=', valueLen=8, ',' '}'
+		StringBuilder buf = new StringBuilder(size * (5 + 1 + 8 + 1) + 2);	// '{' 预估keyLen=5, '=', valueLen=8, ',' '}'
 		if(size == 0) {
 			return buf.append("{}").toString();
 		}
+		buf.append("{");
 		append(head.nexts[0], buf);
-		buf.insert(0, "{").append("}");
+		if(buf.length() > 1) {
+			buf.setLength(buf.length()-2);
+			buf.append("}");
+		}
 		return buf.toString();
 	}
 	
