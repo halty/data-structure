@@ -85,7 +85,7 @@ public class TrieMap<V> {
 				}
 			}else {
 				if(parent.numOfChildNodes == parent.chars.length) {
-					resize(parent);
+					expand(parent);
 				}
 				char[] chars = parent.chars;
 				int first = ch % chars.length;
@@ -139,18 +139,36 @@ public class TrieMap<V> {
 		}
 	}
 	
-	private void resize(TrieNode<V> parent) {
+	private void expand(TrieNode<V> parent) {
+		int oldCapactiy = parent.chars.length;
+		int newCapacity = oldCapactiy << 1;
+		if(newCapacity > Character.MAX_VALUE) {
+			newCapacity = Character.MAX_VALUE;
+		}
+		resize(parent, newCapacity);
+	}
+	
+	private void resize(TrieNode<V> parent, int newCapacity) {
 		char[] oldChars = parent.chars;
 		TrieNode<V>[] oldChildNodes = parent.childNodes;
-		int newCapacity = oldChars.length << 1;
 		char[] newChars = new char[newCapacity];
 		@SuppressWarnings("unchecked")
 		TrieNode<V>[] newChildNodes = new TrieNode[newCapacity];
 		for(int i=0; i<oldChars.length; i++) {
 			if(oldChars[i] == 0) { continue; }
-			int newIndex = oldChars[i] % newCapacity;
-			while(newChars[newIndex] != 0) {
+			int first = oldChars[i] % newCapacity;
+			int newIndex = first;
+			boolean found = false;
+			do {
+				if(newChars[newIndex] == 0) {
+					found = true;
+					break;
+				}
 				newIndex = (newIndex+1) % newCapacity;
+			}while(newIndex != first);
+			if(!found) {
+				throw new IllegalStateException("can not find vacancy for char '"
+						+oldChars[i]+"' with newCapacity="+newCapacity);
 			}
 			newChars[newIndex] = oldChars[i];
 			newChildNodes[newIndex] = oldChildNodes[i];
@@ -253,8 +271,43 @@ public class TrieMap<V> {
 		return oldValue;
 	}
 	
-	public void compact() {
-		// TODO: compact the path to release storage space
+	public void compact() { compact(root); }
+	
+	private void compact(TrieNode<V> parent) {
+		if(parent.childNodeForZeroChar != null) {
+			compact(parent.childNodeForZeroChar);
+			if(isEmptyNode(parent.childNodeForZeroChar)) {
+				parent.childNodeForZeroChar = null;
+			}
+		}
+		if(parent.numOfChildNodes > 0) {
+			for(int i=0; i<parent.chars.length; i++) {
+				char ch = parent.chars[i];
+				if(ch == 0) { continue; }
+				compact(parent.childNodes[i]);
+				if(isEmptyNode(parent.childNodes[i])) {
+					parent.chars[i] = 0;
+					parent.childNodes[i] = null;
+					parent.numOfChildNodes--;
+				}
+			}
+			
+			if(parent.numOfChildNodes <= (parent.chars.length >>> 1)) {
+				shrink(parent);
+			}
+		}
+	}
+	
+	private boolean isEmptyNode(TrieNode<V> node) {
+		return !node.occupied
+			&& node.childNodeForZeroChar == null
+			&& node.numOfChildNodes == 0;
+	}
+	
+	private void shrink(TrieNode<V> parent) {
+		int newCapacity = (parent.numOfChildNodes > 1) ?
+				Integer.highestOneBit((parent.numOfChildNodes - 1) << 1) : 1;
+		resize(parent, newCapacity);
 	}
 	
 	@Override
