@@ -1,10 +1,12 @@
 package com.lee.data.structure;
 
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
-/** 不允许<code>null</code> key, 但允许<code>null</code> value **/
-public class SkipListMap<K, V> {
+/** （Key有序）不允许<code>null</code> key, 但允许<code>null</code> value **/
+public class SkipListMap<K, V> implements Iterable<ImmutableEntry<K, V>> {
 
 	private static class SkipListNode<K, V> {
 		K key;
@@ -120,21 +122,25 @@ public class SkipListMap<K, V> {
 			return null;
 		}
 		
-		int minLevel = Math.min(prev.nexts.length, cur.nexts.length);
+		return removeNode(prev, cur);
+	}
+	
+	private V removeNode(SkipListNode<K, V> prev, SkipListNode<K, V> current) {
+		int minLevel = Math.min(prev.nexts.length, current.nexts.length);
 		for(int i=0; i<minLevel; i++) {
-			prev.nexts[i] = cur.nexts[i];
+			prev.nexts[i] = current.nexts[i];
 		}
-		if(cur.nexts.length > prev.nexts.length) {
-			for(int i=minLevel; i<cur.nexts.length; i++) {
+		if(current.nexts.length > prev.nexts.length) {
+			for(int i=minLevel; i<current.nexts.length; i++) {
 				prev = head;
-				while(prev.nexts[i] != null && compare(key, prev.nexts[i].key) > 0) {
+				while(prev.nexts[i] != null && compare(current.key, prev.nexts[i].key) > 0) {
 					prev = prev.nexts[i];
 				}
-				prev.nexts[i] = cur.nexts[i];
+				prev.nexts[i] = current.nexts[i];
 			}
 		}
 		size--;
-		return cur.value;
+		return current.value;
 	}
 	
 	@Override
@@ -162,4 +168,48 @@ public class SkipListMap<K, V> {
 		}
 	}
 
+	@Override
+	public Iterator<ImmutableEntry<K, V>> iterator() {
+		return new SkipListIterator();
+	}
+
+	private final class SkipListIterator implements Iterator<ImmutableEntry<K, V>> {
+		
+		private SkipListNode<K, V> next;
+		private SkipListNode<K, V> current;
+		private SkipListNode<K, V> prev;
+		
+		SkipListIterator() {
+			next = head.nexts[0];
+			current = null;
+			prev = null;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return next != null;
+		}
+
+		@Override
+		public ImmutableEntry<K, V> next() {
+			SkipListNode<K, V> node = next;
+			if(node == null) { throw new NoSuchElementException(); }
+			next = next.nexts[0];
+			if(prev == null) {
+				prev = head;
+			}else {
+				prev = prev.nexts[0];
+			}
+			current = node;
+			return new ImmutableEntry<K, V>(node.key, node.value);
+		}
+		
+		@Override
+		public void remove() {
+			SkipListNode<K, V> node = current;
+			if(node == null) { throw new IllegalStateException(); }
+			removeNode(prev, node);
+			current = null;
+		}
+	}
 }

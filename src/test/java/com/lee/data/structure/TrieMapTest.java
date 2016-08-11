@@ -5,6 +5,7 @@ public class TrieMapTest {
 	public static void main(String[] args) {
 		normalTest();
 		compactTest();
+		iteratorTest();
 	}
 	
 	private static void normalTest() {
@@ -109,7 +110,11 @@ public class TrieMapTest {
 		map.compact();
 		System.out.println(map.size());
 		System.out.println(map.get(""));
+		System.out.println(map.containKey("aaaaaaaaaa"));
 		System.out.println();
 	}
 
+	private static void iteratorTest() {
+		
+	}
 }

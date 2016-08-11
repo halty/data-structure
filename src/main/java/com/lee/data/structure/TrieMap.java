@@ -1,7 +1,9 @@
 package com.lee.data.structure;
 
+import java.util.Iterator;
+
 /** 允许<code>null</code> key or <code>null</code> value **/
-public class TrieMap<V> {
+public class TrieMap<V> implements Iterable<ImmutableEntry<String, V>> {
 	
 	private static final int INIT_CHILD_NODE_NUM = 1;
 
@@ -352,6 +354,30 @@ public class TrieMap<V> {
 				append(keyStack, parent.childNodes[i], buf);
 				keyStack.setLength(keyStack.length()-1);
 			}
+		}
+	}
+	
+	@Override
+	public Iterator<ImmutableEntry<String, V>> iterator() {
+		return new TrieIterator();
+	}
+	
+	private final class TrieIterator implements Iterator<ImmutableEntry<String, V>> {
+		@Override
+		public boolean hasNext() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public ImmutableEntry<String, V> next() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		@Override
+		public void remove() {
+			
 		}
 	}
 }

@@ -1,7 +1,12 @@
 package com.lee.data.structure;
 
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+
 /** 允许<code>null</code> key or <code>null</code> value **/
-public class HashTreeMap<K, V> {
+public class HashTreeMap<K, V> implements Iterable<ImmutableEntry<K, V>> {
 
 	private static class HashTreeNode<K, V> {
 		K key;
@@ -31,7 +36,7 @@ public class HashTreeMap<K, V> {
 	/** 无需很大的素数，所以普通的因子素数检测法已经足够 **/
 	private static boolean isPrime(int number) {
 		int max = (int) Math.sqrt(number);
-		if(max < 2) { max = 2; }
+		if(max < 2) { return true; }
 		for(int i=2; i<=max; i++) {
 			if(number % i == 0) { return false; }
 		}
@@ -193,6 +198,90 @@ public class HashTreeMap<K, V> {
 		}
 		for(HashTreeNode<K, V> child : node.childs) {
 			if(child != null) { append(child, buf); }
+		}
+	}
+
+	@Override
+	public Iterator<ImmutableEntry<K, V>> iterator() {
+		return new HashTreeIterator();
+	}
+	
+	private final class HashTreeIterator implements Iterator<ImmutableEntry<K, V>> {
+		
+		private Deque<Pair<HashTreeNode<K, V>, Integer>> stack;
+		private HashTreeNode<K, V> next;
+		private HashTreeNode<K, V> current;
+		
+		HashTreeIterator() {
+			stack = new LinkedList<Pair<HashTreeNode<K, V>, Integer>>();
+			next = firstNode();
+			current = null;
+		}
+		
+		HashTreeNode<K, V> firstNode() {
+			if(size == 0) { return null; }
+			pushStack(root);
+			return nextNode();
+		}
+		
+		void pushStack(HashTreeMap.HashTreeNode<K,V> node) {
+			stack.push(Pair.of(node, -1));
+		}
+		
+		HashTreeNode<K, V> nextNode() {
+			while(!stack.isEmpty()) {
+				Pair<HashTreeNode<K,V>, Integer> pair = peekStack();
+				HashTreeNode<K,V> node = pair.getLeft();
+				int childIndex = pair.getRight();
+				if(childIndex == -1) {
+					if(node.occupied) {
+						pair.setRight(childIndex + 1);
+						return node;
+					}
+					childIndex += 1;
+				}
+				
+				for(;childIndex < node.childs.length && node.childs[childIndex] == null; childIndex++);
+				if(childIndex < node.childs.length) {
+					pair.setRight(childIndex+1);
+					pushStack(node.childs[childIndex]);
+					continue;
+				}
+				// childIndex == node.childs.length
+				popStack();
+			}
+			return null;
+		}
+		
+		Pair<HashTreeMap.HashTreeNode<K,V>, Integer> peekStack() {
+			return stack.peek();
+		}
+		
+		Pair<HashTreeMap.HashTreeNode<K,V>, Integer> popStack() {
+			return stack.pop();
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return next != null;
+		}
+
+		@Override
+		public ImmutableEntry<K, V> next() {
+			HashTreeNode<K, V> node = next;
+			if(node == null) { throw new NoSuchElementException(); }
+			next = nextNode();
+			current = node;
+			return new ImmutableEntry<K, V>(node.key, node.value);
+		}
+		
+		@Override
+		public void remove() {
+			if(current != null && current.occupied) {
+				current.value = null;
+				current.occupied = false;
+				size--;
+			}
 		}
 	}
 
