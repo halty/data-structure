@@ -224,7 +224,7 @@ public class HashTreeMap<K, V> implements Iterable<ImmutableEntry<K, V>> {
 			return nextNode();
 		}
 		
-		void pushStack(HashTreeMap.HashTreeNode<K,V> node) {
+		void pushStack(HashTreeNode<K,V> node) {
 			stack.push(Pair.of(node, -1));
 		}
 		
@@ -253,11 +253,11 @@ public class HashTreeMap<K, V> implements Iterable<ImmutableEntry<K, V>> {
 			return null;
 		}
 		
-		Pair<HashTreeMap.HashTreeNode<K,V>, Integer> peekStack() {
+		Pair<HashTreeNode<K,V>, Integer> peekStack() {
 			return stack.peek();
 		}
 		
-		Pair<HashTreeMap.HashTreeNode<K,V>, Integer> popStack() {
+		Pair<HashTreeNode<K,V>, Integer> popStack() {
 			return stack.pop();
 		}
 		

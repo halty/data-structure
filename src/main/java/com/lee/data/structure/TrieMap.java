@@ -1,6 +1,9 @@
 package com.lee.data.structure;
 
+import java.util.Deque;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
 
 /** 允许<code>null</code> key or <code>null</code> value **/
 public class TrieMap<V> implements Iterable<ImmutableEntry<String, V>> {
@@ -363,21 +366,129 @@ public class TrieMap<V> implements Iterable<ImmutableEntry<String, V>> {
 	}
 	
 	private final class TrieIterator implements Iterator<ImmutableEntry<String, V>> {
+		
+		private Deque<Pair<TrieNode<V>, Integer>> stack;
+		private StringBuilder keyStack;
+		private TrieNode<V> next;
+		private TrieNode<V> current;
+		private boolean nextIsNullKey;
+		private boolean prevIsNullKey;
+		
+		TrieIterator() {
+			stack = new LinkedList<Pair<TrieNode<V>, Integer>>();
+			keyStack = new StringBuilder();
+			if(hasNullKey) {
+				nextIsNullKey = true;
+			}else {
+				next = firstNode();
+				current = null;
+				nextIsNullKey = false;
+			}
+			prevIsNullKey = false;
+		}
+		
+		TrieNode<V> firstNode() {
+			if(size == 0) { return null; }
+			pushStack(root);
+			return nextNode();
+		}
+		
+		void pushStack(TrieNode<V> node) {
+			stack.push(Pair.of(node, -2));
+		}
+		
+		void pushStack(TrieNode<V> node, char ch) {
+			stack.push(Pair.of(node, -2));
+			keyStack.append(ch);
+		}
+		
+		TrieNode<V> nextNode() {
+			while(!stack.isEmpty()) {
+				Pair<TrieNode<V>, Integer> pair = peekStack();
+				TrieNode<V> node = pair.getLeft();
+				int childIndex = pair.getRight();
+				if(childIndex == -2) {
+					if(node.occupied) {
+						pair.setRight(childIndex + 1);
+						return node;
+					}
+					childIndex += 1;
+				}
+				if(childIndex == -1) {
+					if(node.childNodeForZeroChar != null) {
+						pair.setRight(childIndex + 1);
+						pushStack(node.childNodeForZeroChar, (char)0);
+						continue;
+					}
+					childIndex += 1;
+				}
+				
+				for(; childIndex < node.chars.length && node.chars[childIndex] == 0; childIndex++);
+				if(childIndex < node.chars.length) {
+					pair.setRight(childIndex + 1);
+					pushStack(node.childNodes[childIndex], node.chars[childIndex]);
+					continue;
+				}
+				// childIndex == node.childs.length
+				popStack();
+			}
+			return null;
+		}
+		
+		Pair<TrieNode<V>, Integer> peekStack() {
+			return stack.peek();
+		}
+		
+		Pair<TrieNode<V>, Integer> popStack() {
+			int length = keyStack.length();
+			if(length > 0) { keyStack.setLength(length - 1); }
+			return stack.pop();
+		}
+		
 		@Override
 		public boolean hasNext() {
-			// TODO Auto-generated method stub
-			return false;
+			if(nextIsNullKey) {
+				return hasNullKey;
+			}else {
+				return next != null;
+			}
 		}
 
 		@Override
 		public ImmutableEntry<String, V> next() {
-			// TODO Auto-generated method stub
-			return null;
+			if(nextIsNullKey) {
+				nextIsNullKey = false;
+				if(hasNullKey) {
+					next = firstNode();
+					current = null;
+					prevIsNullKey = true;
+					return new ImmutableEntry<String, V>(null, valueForNullKey);
+				}
+			}
+			TrieNode<V> node = next;
+			if(node == null) { throw new NoSuchElementException(); }
+			String key = keyStack.toString();
+			next = nextNode();
+			current = node;
+			prevIsNullKey = false;
+			return new ImmutableEntry<String, V>(key, node.value);
 		}
 		
 		@Override
 		public void remove() {
-			
+			if(prevIsNullKey) {
+				if(hasNullKey) {
+					valueForNullKey = null;
+					hasNullKey = false;
+					size--;
+				}
+			}else {
+				if(current != null && current.occupied) {
+					current.value = null;
+					current.occupied = false;
+					size--;
+				}
+			}
 		}
 	}
 }

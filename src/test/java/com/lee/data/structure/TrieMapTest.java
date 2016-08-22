@@ -1,5 +1,7 @@
 package com.lee.data.structure;
 
+import java.util.Iterator;
+
 public class TrieMapTest {
 
 	public static void main(String[] args) {
@@ -115,6 +117,26 @@ public class TrieMapTest {
 	}
 
 	private static void iteratorTest() {
+		TrieMap<Integer> map = new TrieMap<Integer>();
+		map.put("one", 1);
+		map.put("two", 2);
+		map.put("three", 3);
+		map.put("four", 4);
+		map.put("five", 5);
+		map.put("", 0);
+		map.put(null, -1);
 		
+		System.out.println(map);
+		System.out.println(map.size());
+		Iterator<ImmutableEntry<String, Integer>> iterator = map.iterator();
+		while(iterator.hasNext()) {
+			ImmutableEntry<String, Integer> e = iterator.next();
+			System.out.println(e.key + " = " + e.value);
+			iterator.remove();
+		}
+		map.compact();
+		System.out.println();
+		System.out.println(map);
+		System.out.println(map.size());
 	}
 }
