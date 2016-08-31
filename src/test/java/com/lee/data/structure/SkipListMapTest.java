@@ -7,6 +7,7 @@ public class SkipListMapTest {
 	public static void main(String[] args) {
 		normalTest();
 		iteratorTest();
+		sortTest();
 	}
 
 	private static void normalTest() {
@@ -45,5 +46,24 @@ public class SkipListMapTest {
 			iterator.remove();
 		}
 		System.out.println(map.size());
+	}
+	
+	private static void sortTest() {
+		SkipListMap<String, String> map = new SkipListMap<String, String>(4);
+		map.put("1", "one");
+		map.put("3", "three");
+		map.put("4", "four");
+		map.put("2", "two");
+		map.put("5", "five");
+		
+		System.out.println(map.size());
+		System.out.println(map.lowerEntry("1"));
+		System.out.println(map.floorEntry("1"));
+		System.out.println(map.floorEntry("3"));
+		System.out.println(map.ceilingEntry("3"));
+		System.out.println(map.ceilingEntry("5"));
+		System.out.println(map.higherEntry("5"));
+		System.out.println(map.firstEntry());
+		System.out.println(map.lastEntry());
 	}
 }

@@ -28,6 +28,7 @@ public class SkipListMap<K, V> implements Iterable<ImmutableEntry<K, V>> {
 	private int size;
 	private int level;
 	
+	/** Using the natural ordering specified by {@link Comparable} **/
 	public SkipListMap(int maxLevel) {
 		this(maxLevel, null);
 	}
@@ -211,5 +212,79 @@ public class SkipListMap<K, V> implements Iterable<ImmutableEntry<K, V>> {
 			removeNode(prev, node);
 			current = null;
 		}
+	}
+	
+	/**
+     * Returns a key-value mapping associated with the greatest key
+     * strictly less than the given key, or {@code null} if there is
+     * no such key.
+     */
+	public ImmutableEntry<K, V> lowerEntry(K key) {
+		SkipListNode<K, V> prev = prevFor(key);
+		return prev == head ? null : new ImmutableEntry<K, V>(prev.key, prev.value);
+	}
+	
+	/**
+     * Returns a key-value mapping associated with the greatest key
+     * less than or equal to the given key, or {@code null} if there
+     * is no such key.
+     */
+	public ImmutableEntry<K, V> floorEntry(K key) {
+		SkipListNode<K, V> prev = prevFor(key);
+		SkipListNode<K, V> cur = prev.nexts[0];
+		if(cur != null && compare(key, cur.key) == 0) {
+			return new ImmutableEntry<K, V>(cur.key, cur.value);
+		}
+		return prev == head ? null : new ImmutableEntry<K, V>(prev.key, prev.value);
+	}
+	
+	/**
+     * Returns a key-value mapping associated with the least key
+     * greater than or equal to the given key, or {@code null} if
+     * there is no such key.
+     */
+	public ImmutableEntry<K, V> ceilingEntry(K key) {
+		SkipListNode<K, V> prev = prevFor(key);
+		SkipListNode<K, V> cur = prev.nexts[0];
+		if(cur == null) { return null; }
+		if(compare(key, cur.key) == 0) { return new ImmutableEntry<K, V>(cur.key, cur.value); }
+		SkipListNode<K, V> next = cur.nexts[0];
+		return next == null ? null : new ImmutableEntry<K, V>(next.key, next.value);
+	}
+	
+	/**
+     * Returns a key-value mapping associated with the least key
+     * strictly greater than the given key, or {@code null} if there
+     * is no such key.
+     */
+	public ImmutableEntry<K, V> higherEntry(K key) {
+		SkipListNode<K, V> prev = prevFor(key);
+		SkipListNode<K, V> cur = prev.nexts[0];
+		if(cur == null) { return null; }
+		SkipListNode<K, V> next = cur.nexts[0];
+		return next == null ? null : new ImmutableEntry<K, V>(next.key, next.value);
+	}
+	
+	/**
+     * Returns a key-value mapping associated with the least
+     * key in this map, or {@code null} if the map is empty.
+     */
+	public ImmutableEntry<K, V> firstEntry() {
+		SkipListNode<K, V> first = head.nexts[0];
+		return first == null ? null : new ImmutableEntry<K, V>(first.key, first.value);
+	}
+	
+	/**
+     * Returns a key-value mapping associated with the greatest
+     * key in this map, or {@code null} if the map is empty.
+     */
+	public ImmutableEntry<K, V> lastEntry() {
+		SkipListNode<K, V> prev = head;
+		for(int i=level; i >= 0; i--) {
+			while(prev.nexts[i] != null) {
+				prev = prev.nexts[i];
+			}
+		}
+		return prev == head ? null : new ImmutableEntry<K, V>(prev.key, prev.value);
 	}
 }
