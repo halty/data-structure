@@ -5,7 +5,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-/** 允许<code>null</code> key or <code>null</code> value **/
+/**
+ * permits <code>null</code> key or <code>null</code> value
+ * @NotThreadSafe
+ */
 public class TrieMap<V> implements Iterable<ImmutableEntry<String, V>> {
 	
 	private static final int INIT_CHILD_NODE_NUM = 1;

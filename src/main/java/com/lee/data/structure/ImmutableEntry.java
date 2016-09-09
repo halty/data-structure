@@ -1,6 +1,10 @@
 package com.lee.data.structure;
 
-/** 简单的不可变Entry **/
+/**
+ * simple immutable entry
+ * @ThreadSafe if key and value also are immutable class, otherwise
+ * @NotThreadSafe
+ */
 public final class ImmutableEntry<K, V> {
 	
 	public final K key;

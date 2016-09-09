@@ -5,7 +5,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-/** 允许<code>null</code> key or <code>null</code> value **/
+/**
+ * permits <code>null</code> key or <code>null</code> value
+ * @NotThreadSafe
+ */
 public class HashTreeMap<K, V> implements Iterable<ImmutableEntry<K, V>> {
 
 	private static class HashTreeNode<K, V> {

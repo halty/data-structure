@@ -1,6 +1,9 @@
 package com.lee.data.structure;
 
-/** A rolling char buffer based JVM Heap **/
+/**
+ * A rolling char buffer based JVM Heap
+ * @NotThreadSafe
+ */
 class RollingHeapCharBuffer extends RollingCharBuffer {
 
 	private char[] buffer;

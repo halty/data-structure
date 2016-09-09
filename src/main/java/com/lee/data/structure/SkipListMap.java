@@ -5,7 +5,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-/** （Key有序）不允许<code>null</code> key, 但允许<code>null</code> value **/
+/**
+ * don't permit <code>null</code> key, permits <code>null</code> value<br/>
+ * The map is ordered according to the {@linkplain Comparable natural
+ * ordering} of its keys, or by a {@link Comparator} typically
+ * provided at sorted map creation time.
+ * @NotThreadSafe
+ */
 public class SkipListMap<K, V> implements Iterable<ImmutableEntry<K, V>> {
 
 	private static class SkipListNode<K, V> {

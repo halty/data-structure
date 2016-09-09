@@ -6,7 +6,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-/** （Key有序）不允许<code>null</code> key, 但允许<code>null</code> value **/
+/**
+ * don't permit <code>null</code> key, permits <code>null</code> value<br/>
+ * The map is ordered according to the {@linkplain Comparable natural
+ * ordering} of its {@linkplain String} keys.
+ * @NotThreadSafe
+ */
 public class SortedTrieMap<V> implements Iterable<ImmutableEntry<String, V>> {
 
 	private static final int INIT_CHILD_NODE_NUM = 1;

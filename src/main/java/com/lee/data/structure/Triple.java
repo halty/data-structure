@@ -1,5 +1,8 @@
 package com.lee.data.structure;
 
+/**
+ * @NotThreadSafe
+ */
 public final class Triple<L, M, R> {
 
 	private L left;

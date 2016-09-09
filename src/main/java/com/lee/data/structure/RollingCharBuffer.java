@@ -2,7 +2,9 @@ package com.lee.data.structure;
 
 import static com.lee.data.structure.util.PlatformDependent.hasUnsafe;
 
-/** Non thread safe buffer **/
+/**
+ * @NotThreadSafe
+ */
 public abstract class RollingCharBuffer {
 
 	private boolean isReleased;	// mark this buffer whether released by caller or not

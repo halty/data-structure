@@ -1,5 +1,8 @@
 package com.lee.data.structure;
 
+/**
+ * @NotThreadSafe
+ */
 public final class Pair<L, R> {
 
 	private L left;

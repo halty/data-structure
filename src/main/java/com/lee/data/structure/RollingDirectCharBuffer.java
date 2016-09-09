@@ -3,7 +3,10 @@ package com.lee.data.structure;
 import static com.lee.data.structure.util.PlatformDependent.*;
 import sun.misc.Cleaner;
 
-/** A rolling char buffer based OS's memory **/
+/**
+ * A rolling char buffer based OS's memory
+ * @NotThreadSafe
+ */
 class RollingDirectCharBuffer extends RollingCharBuffer {
 
 	private MemoryBlock block;	// memory block to store characters
