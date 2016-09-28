@@ -98,11 +98,12 @@ public class SortedTrieMap<V> implements Iterable<ImmutableEntry<String, V>> {
 	}
 	
 	private void expand(SortedTrieNode<V> parent) {
-		int oldCapactiy = parent.chars.length;
-		if(oldCapactiy == Character.MAX_VALUE) { return; }
-		int newCapacity = oldCapactiy << 1;
-		if(newCapacity > Character.MAX_VALUE) {
-			newCapacity = Character.MAX_VALUE;
+		int oldCapacity = parent.chars.length;
+		int maxCapacity = Character.MAX_VALUE + 1;
+		if(oldCapacity == maxCapacity) { return; }
+		int newCapacity = oldCapacity << 1;
+		if(newCapacity > maxCapacity) {
+			newCapacity = maxCapacity;
 		}
 		char[] newChars = new char[newCapacity];
 		System.arraycopy(parent.chars, 0, newChars, 0, parent.numOfChildNodes);
