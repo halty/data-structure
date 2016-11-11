@@ -725,7 +725,7 @@ public class DoubleArrayTrieMap<V> implements Iterable<ImmutableEntry<String, V>
 					depth -= count;
 					if(stateStack.top() > depth) {
 						// currentState and nextState has common parent state
-						assert state == stateStack.peekState(depth);
+						// assert state == stateStack.peekState(depth);
 						stateStack.decChildIndex(depth);
 					}
 				}
