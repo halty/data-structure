@@ -98,21 +98,21 @@ public final class Hashing {
 				Object[] array = (Object[]) obj;
 				for(Object e : array) { flush(e); }
 			}else if(clazz == boolean.class || clazz == Boolean.class) {
-				bb.put((byte) ((boolean)obj ? 1 : 0));
+				bb.put((byte) ((Boolean)obj ? 1 : 0));
 			}else if(clazz == byte.class || clazz == Byte.class) {
-				bb.put((byte) obj);
+				bb.put((Byte) obj);
 			}else if(clazz == char.class || clazz == Character.class) {
-				bb.putChar((char) obj);
+				bb.putChar((Character) obj);
 			}else if(clazz == short.class || clazz == Short.class) {
-				bb.putShort((short) obj);
+				bb.putShort((Short) obj);
 			}else if(clazz == int.class || clazz == Integer.class) {
-				bb.putInt((int) obj);
+				bb.putInt((Integer) obj);
 			}else if(clazz == long.class || clazz == Long.class) {
-				bb.putLong((long) obj);
+				bb.putLong((Long) obj);
 			}else if(clazz == float.class || clazz == Float.class) {
-				bb.putFloat((float) obj);
+				bb.putFloat((Float) obj);
 			}else if(clazz == double.class || clazz == Double.class) {
-				bb.putDouble((double) obj);
+				bb.putDouble((Double) obj);
 			}else if(clazz == Date.class) {
 				bb.putLong(((Date)obj).getTime());
 			}else if(obj instanceof Calendar) {
