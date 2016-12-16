@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Map;
 import com.lee.data.structure.ImmutableEntry;
 
-/** do not permit <code>null</code> key, permits <code>null</code> value **/
+/** do not permit <code>null</code> IndexKey, permits <code>null</code> value **/
 public interface Indexer<K, V> {
 	
 	/** return the number of key-value mappings in this indexer **/
@@ -33,6 +33,8 @@ public interface Indexer<K, V> {
 	 * associate it with the given value in this indexer.
 	 * return the previous value associated with the specified key, or
      * <code>null</code> if there was no mapping for the key.
+     * (A <tt>null</tt> return can also indicate that the indexer
+     * previously associated <tt>null</tt> with the key)
 	 */
 	V putIfAbsent(IndexKey<K> key, V value);
 	
@@ -70,6 +72,7 @@ public interface Indexer<K, V> {
 	 * The effect of this call is equivalent to that of calling
 	 * {@link #putIfAbsent(IndexKey, Object) putIfAbsent(IndexKey, V)} on this indexer
 	 * once for each mapping from key to value in the specified map.
+	 * return the added entry count from {@code map}.
 	 */
 	int putAllIfAbsent(Map<IndexKey<K>, V> map);
 	
@@ -78,6 +81,7 @@ public interface Indexer<K, V> {
 	 * The effect of this call is equivalent to that of calling
 	 * {@link #putIfAbsent(IndexKey, Object) putIfAbsent(IndexKey, V)} on this indexer
 	 * once for each mapping from key to value in the specified indexer.
+	 * return the added entry count from {@code map}.
 	 */
 	int putAllIfAbsent(Indexer<K, V> indexer);
 	
@@ -86,6 +90,7 @@ public interface Indexer<K, V> {
 	 * The effect of this call is equivalent to that of calling
 	 * {@link #replaceIfPresent(IndexKey, Object) replaceIfPresent(IndexKey, V)} on this indexer
 	 * once for each mapping from key to value in the specified map.
+	 * return the replaced entry count from {@code map}.
 	 */
 	int replaceAllIfPresent(Map<IndexKey<K>, V> map);
 	
@@ -94,6 +99,7 @@ public interface Indexer<K, V> {
 	 * The effect of this call is equivalent to that of calling
 	 * {@link #replaceIfPresent(IndexKey, Object) replaceIfPresent(IndexKey, V)} on this indexer
 	 * once for each mapping from key to value in the specified indexer.
+	 * return the replaced entry count from {@code map}.
 	 */
 	int replaceAllIfPresent(Indexer<K, V> indexer);
 	

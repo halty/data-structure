@@ -47,8 +47,8 @@ public final class ImmutableEntry<K, V> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder(64);
-		builder.append("ImmutableEntry [key=").append(key)
-			.append(", value=").append(value).append("]");
+		builder.append("ImmutableEntry {key=").append(key)
+			.append(", value=").append(value).append("}");
 		return builder.toString();
 	}
 }

@@ -9,29 +9,33 @@ public final class IndexKey<K> {
 
 	private int hash;
 	
-	public IndexKey(K key) {
-		keys = new Object[]{ key };
+	public static <K> IndexKey<K> of(K key) {
+		return of(new Object[]{ key });
 	}
 	
-	public IndexKey(K key1, K key2) {
-		keys = new Object[]{ key1, key2 };
+	public static <K> IndexKey<K> of(K key1, K key2) {
+		return of(new Object[]{ key1, key2 });
 	}
 	
-	public IndexKey(K key1, K key2, K key3) {
-		keys = new Object[]{ key1, key2, key3 };
+	public static <K> IndexKey<K> of(K key1, K key2, K key3) {
+		return of(new Object[]{ key1, key2, key3 });
 	}
 	
-	public IndexKey(K key1, K key2, K key3, K key4) {
-		keys = new Object[]{ key1, key2, key3, key4 };
+	public static <K> IndexKey<K> of(K key1, K key2, K key3, K key4) {
+		return of(new Object[]{ key1, key2, key3, key4 });
 	}
 	
-	public IndexKey(K key1, K key2, K key3, K key4, K key5) {
-		keys = new Object[]{ key1, key2, key3, key4, key5 };
+	public static <K> IndexKey<K> of(K key1, K key2, K key3, K key4, K key5) {
+		return of(new Object[]{ key1, key2, key3, key4, key5 });
 	}
 	
-	public IndexKey(K[] keys) {
-		this.keys = Arrays.copyOf(keys, keys.length);
+	public static <K> IndexKey<K> copyOf(K[] keys) {
+		return of(Arrays.copyOf(keys, keys.length));
 	}
+	
+	private static <K> IndexKey<K> of(Object[] keys) { return new IndexKey<K>(keys); }
+	
+	private IndexKey(Object[] keys) { this.keys = keys; }
 	
 	@SuppressWarnings("unchecked")
 	public K[] keys() {
@@ -51,7 +55,7 @@ public final class IndexKey<K> {
 	public int hashCode() {
 		int h = hash;
 		if(h == 0 && keys.length > 0) {
-			hash = h = Arrays.hashCode(keys);
+			hash = h = (31 + Arrays.hashCode(keys));
 		}
 		return h;
 	}
