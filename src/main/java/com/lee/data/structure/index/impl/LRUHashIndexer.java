@@ -24,7 +24,7 @@ public class LRUHashIndexer<K, V> extends AbstractIndexer<K, V> {
 		if(maxCapacity <= 0) {
 			throw new IllegalArgumentException("Illegal max capacity: " + maxCapacity);
 		}
-		if (loadFactor <= 0 || Float.isNaN(loadFactor)) {
+		if(loadFactor <= 0 || loadFactor > 1 || Float.isNaN(loadFactor)) {
             throw new IllegalArgumentException("Illegal load factor: " + loadFactor);
 		}
 		int initCapacity = (int)(maxCapacity / loadFactor);
@@ -34,7 +34,7 @@ public class LRUHashIndexer<K, V> extends AbstractIndexer<K, V> {
 	}
 
 	@Override
-	protected Map<IndexKey<K>, V> backendMap() { return map; }
+	protected Map<IndexKey<K>, V> backedMap() { return map; }
 
 	private final class LRUMap extends LinkedHashMap<IndexKey<K>, V> {
 

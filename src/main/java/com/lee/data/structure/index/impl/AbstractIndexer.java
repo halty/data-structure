@@ -17,26 +17,26 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	protected static final Object NULL_VALUE = new Object();
 	
 	/** return the map backed by subclass implementation  **/
-	protected abstract Map<IndexKey<K>, V> backendMap();
+	protected abstract Map<IndexKey<K>, V> backedMap();
 	
 	@Override
-	public int size() { return backendMap().size(); }
+	public int size() { return backedMap().size(); }
 
 	@Override
-	public boolean isEmpty() { return backendMap().isEmpty(); }
+	public boolean isEmpty() { return backedMap().isEmpty(); }
 
 	@Override
-	public boolean containsKey(IndexKey<K> key) { return backendMap().containsKey(key); }
+	public boolean containsKey(IndexKey<K> key) { return backedMap().containsKey(key); }
 
 	@Override
-	public V get(IndexKey<K> key) { return unmask(backendMap().get(key)); }
+	public V get(IndexKey<K> key) { return unmask(backedMap().get(key)); }
 	
 	protected V unmask(V value) { return value == NULL_VALUE ? null : value; }
 
 	@Override
 	public V put(IndexKey<K> key, V value) { return unmask(internalPut(key, value)); }
 	
-	protected V internalPut(IndexKey<K> key, V value) { return backendMap().put(key, mask(value)); }
+	protected V internalPut(IndexKey<K> key, V value) { return backedMap().put(key, mask(value)); }
 	
 	@SuppressWarnings("unchecked")
 	protected V mask(V value) { return value == null ? (V) NULL_VALUE : value; }
@@ -45,7 +45,7 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	public V putIfAbsent(IndexKey<K> key, V value) { return unmask(internalPutIfAbsent(key, mask(value))); }
 	
 	protected V internalPutIfAbsent(IndexKey<K> key, V value) {
-		Map<IndexKey<K>, V> map = backendMap();
+		Map<IndexKey<K>, V> map = backedMap();
 		V oldValue = map.get(key);
 		if(oldValue != null) {
 			return oldValue;
@@ -59,10 +59,10 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	public V replaceIfPresent(IndexKey<K> key, V value) { return unmask(internalReplaceIfPresent(key, mask(value))); }
 	
 	protected V internalReplaceIfPresent(IndexKey<K> key, V value) {
-		Map<IndexKey<K>, V> map = backendMap();
+		Map<IndexKey<K>, V> map = backedMap();
 		V oldValue = map.get(key);
 		if(oldValue != null) {
-			backendMap().put(key, value);
+			map.put(key, value);
 			return oldValue;
 		}else {
 			return null;
@@ -75,7 +75,7 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	}
 
 	protected boolean internalReplaceIfMatched(IndexKey<K> key, V oldValue, V newValue) {
-		Map<IndexKey<K>, V> map = backendMap();
+		Map<IndexKey<K>, V> map = backedMap();
 		V prevValue = map.get(key);
 		if(prevValue != null) {
 			if(prevValue.equals(oldValue)) {
@@ -90,14 +90,14 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	}
 
 	@Override
-	public void putAll(Map<IndexKey<K>, V> m) {
+	public void putAll(Map<? extends IndexKey<K>, ? extends V> m) {
 		if(m.size() == 0) { return; }
 		/*
 		 * If (m.size() + size) >= map.threshold, and this indexer doesn't
-		 * contain the keys to be added, maybe result in the backend map
+		 * contain the keys to be added, maybe result in the backed map
 		 * of this indexer resize multiple times.
 		 */
-		for(Entry<IndexKey<K>, V> entry : m.entrySet()) {
+		for(Entry<? extends IndexKey<K>, ? extends V> entry : m.entrySet()) {
 			internalPut(entry.getKey(), mask(entry.getValue()));
 		}
 	}
@@ -107,7 +107,7 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 		if(idx.size() == 0) { return; }
 		/*
 		 * If (idx.size() + size) >= map.threshold, and this indexer doesn't
-		 * contain the keys to be added, maybe result in the backend map
+		 * contain the keys to be added, maybe result in the backed map
 		 * of this indexer resize multiple times.
 		 */
 		Iterator<ImmutableEntry<IndexKey<K>, V>> iter = idx.entryIterator();
@@ -118,10 +118,10 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	}
 
 	@Override
-	public int putAllIfAbsent(Map<IndexKey<K>, V> m) {
+	public int putAllIfAbsent(Map<? extends IndexKey<K>, ? extends V> m) {
 		if(m.size() == 0) { return 0; }
 		int putCount = 0;
-		for(Entry<IndexKey<K>, V> entry : m.entrySet()) {
+		for(Entry<? extends IndexKey<K>, ? extends V> entry : m.entrySet()) {
 			if(internalPutIfAbsent(entry.getKey(), mask(entry.getValue())) == null) {
 				putCount++;
 			}
@@ -144,10 +144,10 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	}
 
 	@Override
-	public int replaceAllIfPresent(Map<IndexKey<K>, V> m) {
+	public int replaceAllIfPresent(Map<? extends IndexKey<K>, ? extends V> m) {
 		if(m.size() == 0) { return 0; }
 		int replacedCount = 0;
-		for(Entry<IndexKey<K>, V> entry : m.entrySet()) {
+		for(Entry<? extends IndexKey<K>, ? extends V> entry : m.entrySet()) {
 			if(internalReplaceIfPresent(entry.getKey(), mask(entry.getValue())) != null) {
 				replacedCount++;
 			}
@@ -170,7 +170,7 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	}
 
 	@Override
-	public V remove(IndexKey<K> key) { return unmask(backendMap().remove(key)); }
+	public V remove(IndexKey<K> key) { return unmask(backedMap().remove(key)); }
 	
 	@Override
 	public boolean removeIfMatched(IndexKey<K> key, V value) {
@@ -178,7 +178,7 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	}
 
 	protected boolean internalRemoveIfMatched(IndexKey<K> key, V value) {
-		Map<IndexKey<K>, V> map = backendMap();
+		Map<IndexKey<K>, V> map = backedMap();
 		V oldValue = map.get(key);
 		if(oldValue != null) {
 			if(oldValue.equals(value)) {
@@ -193,17 +193,17 @@ public abstract class AbstractIndexer<K, V> implements Indexer<K, V> {
 	}
 
 	@Override
-	public void clear() { backendMap().clear(); }
+	public void clear() { backedMap().clear(); }
 
 	@Override
-	public Iterator<IndexKey<K>> keyIterator() { return backendMap().keySet().iterator(); }
+	public Iterator<IndexKey<K>> keyIterator() { return backedMap().keySet().iterator(); }
 
 	@Override
 	public Iterator<ImmutableEntry<IndexKey<K>, V>> entryIterator() {
-		return new EntryIterator(backendMap().entrySet().iterator());
+		return new EntryIterator(backedMap().entrySet().iterator());
 	}
 
-	private class EntryIterator implements Iterator<ImmutableEntry<IndexKey<K>, V>> {
+	private final class EntryIterator implements Iterator<ImmutableEntry<IndexKey<K>, V>> {
 		private final Iterator<Entry<IndexKey<K>, V>> iter;
 		
 		public EntryIterator(Iterator<Entry<IndexKey<K>, V>> iter) { this.iter = iter; }

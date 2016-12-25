@@ -50,7 +50,7 @@ public class ConcurrentHashIndexer<K, V> extends AbstractIndexer<K, V> {
 	}
 	
 	@Override
-	protected Map<IndexKey<K>, V> backendMap() { return map; }
+	protected Map<IndexKey<K>, V> backedMap() { return map; }
 
 	@Override
 	protected V internalPutIfAbsent(IndexKey<K> key, V value) {

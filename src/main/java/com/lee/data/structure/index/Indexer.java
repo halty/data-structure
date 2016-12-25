@@ -57,7 +57,7 @@ public interface Indexer<K, V> {
 	 * {@link #put(IndexKey, Object) put(IndexKey, V)} on this indexer
 	 * once for each mapping from key to value in the specified map.
 	 */
-	void putAll(Map<IndexKey<K>, V> map);
+	void putAll(Map<? extends IndexKey<K>, ? extends V> map);
 	
 	/**
 	 * copy all of the mappings from the specified indexer to this indexer.
@@ -74,7 +74,7 @@ public interface Indexer<K, V> {
 	 * once for each mapping from key to value in the specified map.
 	 * return the added entry count from {@code map}.
 	 */
-	int putAllIfAbsent(Map<IndexKey<K>, V> map);
+	int putAllIfAbsent(Map<? extends IndexKey<K>, ? extends V> map);
 	
 	/**
 	 * copy all of the mappings from the specified indexer to this indexer.
@@ -92,7 +92,7 @@ public interface Indexer<K, V> {
 	 * once for each mapping from key to value in the specified map.
 	 * return the replaced entry count from {@code map}.
 	 */
-	int replaceAllIfPresent(Map<IndexKey<K>, V> map);
+	int replaceAllIfPresent(Map<? extends IndexKey<K>, ? extends V> map);
 	
 	/**
 	 * copy all of the mappings from the specified indexer to this indexer.

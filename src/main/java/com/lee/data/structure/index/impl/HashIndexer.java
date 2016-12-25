@@ -30,6 +30,6 @@ public class HashIndexer<K, V> extends AbstractIndexer<K, V> {
 	}
 
 	@Override
-	protected Map<IndexKey<K>, V> backendMap() { return map; }
+	protected Map<IndexKey<K>, V> backedMap() { return map; }
 	
 }
