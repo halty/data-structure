@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.lee.data.structure.ImmutableEntry;
 import com.lee.data.structure.index.impl.ConcurrentHashIndexer;
+import com.lee.data.structure.index.impl.ConcurrentLRUHashIndexer;
 import com.lee.data.structure.index.impl.HashIndexer;
 import com.lee.data.structure.index.impl.LRUHashIndexer;
 
@@ -14,7 +15,8 @@ public class IndexerTest {
 	public static void main(String[] args) {
 		// testHashIndexer();
 		// testLRUHashIndexer();
-		testConcurrentHashIndexer();
+		// testConcurrentHashIndexer();
+		testConcurrentLRUHashIndexer();
 	}
 	
 	private static void testHashIndexer() {
@@ -23,12 +25,19 @@ public class IndexerTest {
 	}
 	
 	private static void testLRUHashIndexer() {
-		Indexer<Integer, String> indexer = new LRUHashIndexer<Integer, String>(10);
+		// Indexer<Integer, String> indexer = new LRUHashIndexer<Integer, String>(10);
+		Indexer<Integer, String> indexer = new LRUHashIndexer<Integer, String>(12);
 		runTestCaseOn(indexer);
 	}
 	
 	private static void testConcurrentHashIndexer() {
 		Indexer<Integer, String> indexer = new ConcurrentHashIndexer<Integer, String>();
+		runTestCaseOn(indexer);
+	}
+	
+	private static void testConcurrentLRUHashIndexer() {
+		// Indexer<Integer, String> indexer = new ConcurrentLRUHashIndexer<Integer, String>(10);
+		Indexer<Integer, String> indexer = new ConcurrentLRUHashIndexer<Integer, String>(12);
 		runTestCaseOn(indexer);
 	}
 	
