@@ -3,7 +3,7 @@ package com.lee.data.structure.index;
 import java.util.Arrays;
 
 /** A wrapper class for multiple keys **/
-public final class IndexKey<K> {
+public final class IndexKey<K> implements Comparable<IndexKey<K>> {
 
 	private final Object[] keys;
 
@@ -66,6 +66,27 @@ public final class IndexKey<K> {
 		if(obj == this) { return true; }
 		if(obj == null || obj.getClass() != IndexKey.class) { return false; }
 		return Arrays.equals(keys, ((IndexKey<K>)obj).keys);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public int compareTo(IndexKey<K> o) {
+		int length = Math.min(keys.length, o.keys.length);
+		for(int i=0; i<length; i++) {
+			Comparable<? super K> k1 = (Comparable<? super K>) keys[i];
+			K k2 = (K) o.keys[i];
+			if(k1 == null) {
+				if(k2 != null) { return -1; }
+			}else {
+				if(k2 == null) {
+					return 1;
+				}else {
+					int cmp = k1.compareTo(k2);
+					if(cmp != 0) { return cmp; }
+				}
+			}
+		}
+		return keys.length - o.keys.length;
 	}
 
 	@Override

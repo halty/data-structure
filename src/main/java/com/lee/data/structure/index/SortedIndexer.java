@@ -86,10 +86,10 @@ public interface SortedIndexer<K, V> extends Indexer<K, V> {
 	
 	/**
 	 * return a view of the portion of this indexer whose keys prefix equals to
-     * {@code toKey}.  The returned indexer is backed by this indexer, so changes
+     * {@code key}.  The returned indexer is backed by this indexer, so changes
      * in the returned indexer are reflected in this indexer, and vice-versa.
 	 */
-	SortedIndexer<K, V> prefix(IndexKey<K> Key);
+	SortedIndexer<K, V> prefix(IndexKey<K> key);
 	
 	/**
 	 * return a view of the portion of this indexer whose keys are less than (or
