@@ -1,4 +1,4 @@
-package com.lee.data.structure;
+package com.lee.data.structure.buffer;
 
 /**
  * A rolling char buffer based JVM Heap

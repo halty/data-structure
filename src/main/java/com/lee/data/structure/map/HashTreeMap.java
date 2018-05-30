@@ -1,4 +1,7 @@
-package com.lee.data.structure;
+package com.lee.data.structure.map;
+
+import com.lee.data.structure.ImmutableEntry;
+import com.lee.data.structure.Pair;
 
 import java.util.Deque;
 import java.util.Iterator;

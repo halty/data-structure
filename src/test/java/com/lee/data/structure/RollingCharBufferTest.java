@@ -1,5 +1,7 @@
 package com.lee.data.structure;
 
+import com.lee.data.structure.buffer.RollingCharBuffer;
+
 import java.util.Arrays;
 
 public class RollingCharBufferTest {

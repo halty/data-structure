@@ -1,4 +1,4 @@
-package com.lee.data.structure;
+package com.lee.data.structure.map;
 
 import java.util.HashMap;
 import java.util.List;

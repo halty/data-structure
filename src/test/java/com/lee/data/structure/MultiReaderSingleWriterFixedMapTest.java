@@ -1,5 +1,7 @@
 package com.lee.data.structure;
 
+import com.lee.data.structure.map.MultiReaderSingleWriterFixedMap;
+
 import java.util.concurrent.TimeUnit;
 
 public class MultiReaderSingleWriterFixedMapTest {

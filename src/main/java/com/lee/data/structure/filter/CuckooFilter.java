@@ -1,4 +1,4 @@
-package com.lee.data.structure;
+package com.lee.data.structure.filter;
 
 import java.util.Random;
 

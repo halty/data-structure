@@ -1,5 +1,7 @@
 package com.lee.data.structure;
 
+import com.lee.data.structure.filter.BloomFilter;
+
 public class BloomFilterTest {
 
 	public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package com.lee.data.structure;
+package com.lee.data.structure.buffer;
 
 import static com.lee.data.structure.util.PlatformDependent.*;
 import sun.misc.Cleaner;

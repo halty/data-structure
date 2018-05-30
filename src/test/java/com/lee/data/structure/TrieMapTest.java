@@ -1,5 +1,7 @@
 package com.lee.data.structure;
 
+import com.lee.data.structure.map.TrieMap;
+
 import java.util.Iterator;
 
 public class TrieMapTest {
