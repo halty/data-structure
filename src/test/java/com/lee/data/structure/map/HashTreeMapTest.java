@@ -1,23 +1,23 @@
-package com.lee.data.structure;
+package com.lee.data.structure.map;
 
-import com.lee.data.structure.map.SkipListMap;
+import com.lee.data.structure.ImmutableEntry;
+import com.lee.data.structure.map.HashTreeMap;
 
 import java.util.Iterator;
 
-public class SkipListMapTest {
+public class HashTreeMapTest {
 
 	public static void main(String[] args) {
 		normalTest();
 		iteratorTest();
-		sortTest();
 	}
-
+	
 	private static void normalTest() {
-		SkipListMap<String, String> map = new SkipListMap<String, String>(4);
+		HashTreeMap<String, String> map = new HashTreeMap<String, String>();
 		map.put("1", "one");
+		map.put("2", "two");
 		map.put("3", "three");
 		map.put("4", "four");
-		map.put("2", "two");
 		map.put("5", "five");
 		
 		System.out.println(map.size());
@@ -26,19 +26,25 @@ public class SkipListMapTest {
 		System.out.println(map.put("3", null));
 		System.out.println(map.get("3"));
 		System.out.println(map.remove("4"));
+		System.out.println(map.put(null, "null"));
+		System.out.println(map.get(null));
 		System.out.println(map.remove("5"));
-		System.out.println(map.put("0", "zero"));
 		System.out.println(map.size());
 		System.out.println(map);
 	}
 
 	private static void iteratorTest() {
-		SkipListMap<String, String> map = new SkipListMap<String, String>(4);
+		HashTreeMap<String, String> map = new HashTreeMap<String, String>();
+		map.put("0", "zero");
 		map.put("1", "one");
+		map.put("2", "two");
 		map.put("3", "three");
 		map.put("4", "four");
-		map.put("2", "two");
 		map.put("5", "five");
+		map.put("6", "six");
+		map.put("7", "seven");
+		map.put("8", "eight");
+		map.put("9", "nine");
 		
 		System.out.println(map.size());
 		Iterator<ImmutableEntry<String, String>> iterator = map.iterator();
@@ -48,24 +54,5 @@ public class SkipListMapTest {
 			iterator.remove();
 		}
 		System.out.println(map.size());
-	}
-	
-	private static void sortTest() {
-		SkipListMap<String, String> map = new SkipListMap<String, String>(4);
-		map.put("1", "one");
-		map.put("3", "three");
-		map.put("4", "four");
-		map.put("2", "two");
-		map.put("5", "five");
-		
-		System.out.println(map.size());
-		System.out.println(map.lowerEntry("1"));
-		System.out.println(map.floorEntry("1"));
-		System.out.println(map.floorEntry("3"));
-		System.out.println(map.ceilingEntry("3"));
-		System.out.println(map.ceilingEntry("5"));
-		System.out.println(map.higherEntry("5"));
-		System.out.println(map.firstEntry());
-		System.out.println(map.lastEntry());
 	}
 }

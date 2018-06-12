@@ -1,4 +1,4 @@
-package com.lee.data.structure;
+package com.lee.data.structure.buffer;
 
 import com.lee.data.structure.buffer.RollingCharBuffer;
 

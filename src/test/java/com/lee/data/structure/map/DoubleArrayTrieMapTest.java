@@ -1,10 +1,11 @@
-package com.lee.data.structure;
+package com.lee.data.structure.map;
 
-import com.lee.data.structure.map.SortedTrieMap;
+import com.lee.data.structure.ImmutableEntry;
+import com.lee.data.structure.map.DoubleArrayTrieMap;
 
 import java.util.Iterator;
 
-public class SortedTrieMapTest {
+public class DoubleArrayTrieMapTest {
 
 	public static void main(String[] args) {
 		normalTest();
@@ -14,7 +15,7 @@ public class SortedTrieMapTest {
 	}
 
 	private static void normalTest() {
-		SortedTrieMap<Integer> map = new SortedTrieMap<Integer>();
+		DoubleArrayTrieMap<Integer> map = new DoubleArrayTrieMap<Integer>(6, 5);
 		map.put("one", 1);
 		map.put("two", 2);
 		map.put("three", 3);
@@ -23,6 +24,7 @@ public class SortedTrieMapTest {
 		map.put("", 0);
 		
 		System.out.println(map.size());
+		System.out.println(map);
 		System.out.println();
 		
 		System.out.println(map.get("one"));
@@ -53,7 +55,7 @@ public class SortedTrieMapTest {
 	}
 	
 	private static void compactTest() {
-		SortedTrieMap<String> map = new SortedTrieMap<String>();
+		DoubleArrayTrieMap<String> map = new DoubleArrayTrieMap<String>(16, 8);
 		map.put("aaaaaaaaaa", "10a");
 		map.put("aaaaaaaaab", "9a1b");
 		map.put("aaaaaaaaa", "9a");
@@ -84,10 +86,8 @@ public class SortedTrieMapTest {
 		System.out.println(map.remove("aaaaaaaaa"));
 		System.out.println(map.remove("aaaaaaab"));
 		System.out.println(map.remove("aaaaaaaaab"));
-		System.out.println(map.size());
 		System.out.println();
 		
-		map.compact();
 		System.out.println(map.size());
 		System.out.println();
 		
@@ -105,7 +105,6 @@ public class SortedTrieMapTest {
 		System.out.println(map.size());
 		System.out.println();
 		
-		map.compact();
 		System.out.println(map.size());
 		System.out.println(map.get(""));
 		System.out.println(map.containKey("aaaaaaaaaa"));
@@ -113,7 +112,7 @@ public class SortedTrieMapTest {
 	}
 	
 	private static void iteratorTest() {
-		SortedTrieMap<Integer> map = new SortedTrieMap<Integer>();
+		DoubleArrayTrieMap<Integer> map = new DoubleArrayTrieMap<Integer>(6, 5);
 		map.put("one", 1);
 		map.put("two", 2);
 		map.put("three", 3);
@@ -129,14 +128,14 @@ public class SortedTrieMapTest {
 			System.out.println(e.key + " = " + e.value);
 			iterator.remove();
 		}
-		map.compact();
+
 		System.out.println();
 		System.out.println(map);
 		System.out.println(map.size());
 	}
 	
 	private static void sortTest() {
-		SortedTrieMap<String> map = new SortedTrieMap<String>();
+		DoubleArrayTrieMap<String> map = new DoubleArrayTrieMap<String>();
 		map.put("1", "1");
 		map.put("13", "13");
 		map.put("124", "124");
@@ -161,7 +160,7 @@ public class SortedTrieMapTest {
 		System.out.println(map.lastEntry());
 		
 		System.out.println();
-		map = new SortedTrieMap<String>();
+		map = new DoubleArrayTrieMap<String>();
 		
 		System.out.println("stage 2:");
 		System.out.println(map.size());
@@ -173,7 +172,7 @@ public class SortedTrieMapTest {
 		System.out.println(map.lastEntry());
 		
 		System.out.println();
-		map = new SortedTrieMap<String>();
+		map = new DoubleArrayTrieMap<String>();
 		map.put("", "empty");
 		
 		System.out.println("stage 3:");
@@ -185,4 +184,5 @@ public class SortedTrieMapTest {
 		System.out.println(map.firstEntry());
 		System.out.println(map.lastEntry());
 	}
+
 }
